@@ -676,22 +676,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --bg:#f3f6f7; --panel:#ffffff; --fg:#14222c; --muted:#5b6d78; --line:#d5dee3;
   --accent:#0f6e8c; --accent-soft:#e1eff4; --warn:#a15c00; --warn-soft:#fdf1df;
   --g1:#0f6e8c; --g2:#c2410c; --g3:#4d7c0f; --g4:#7e3fb0; --g5:#b8860b; --extra:#7a8a94;
+  color-scheme:light;
   --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --sea:#0d1820; --land:#1e2c35; --land-line:#3d5463; --neighbour:#18232a;
-  --bg:#0b1419; --panel:#121e25; --fg:#e3ebef; --muted:#93a6b1; --line:#24343e;
-  --accent:#5cb8d6; --accent-soft:#16303b; --warn:#f0b35a; --warn-soft:#33260f;
-  --g1:#4fb3d9; --g2:#f0835a; --g3:#9acd4f; --g4:#c597ee; --g5:#e6bf4a; --extra:#8796a0;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --sea:#0d1820; --land:#1e2c35; --land-line:#3d5463; --neighbour:#18232a;
-  --bg:#0b1419; --panel:#121e25; --fg:#e3ebef; --muted:#93a6b1; --line:#24343e;
-  --accent:#5cb8d6; --accent-soft:#16303b; --warn:#f0b35a; --warn-soft:#33260f;
-  --g1:#4fb3d9; --g2:#f0835a; --g3:#9acd4f; --g4:#c597ee; --g5:#e6bf4a; --extra:#8796a0;
-  color-scheme:dark}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-body);display:flex;flex-direction:column;overflow:hidden}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 28px;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--panel)}
@@ -751,6 +740,8 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
 .pp .co{margin-top:6px;font:11px var(--f-mono);color:var(--muted)}
 .lbl-site{background:none;border:0;box-shadow:none;font:600 11px var(--f-body);color:var(--fg);text-shadow:0 0 3px var(--sea),0 0 3px var(--sea),0 0 2px var(--sea)}
 .lbl-site::before{display:none}
+.on-sat .lbl-site{color:#fff;text-shadow:0 0 3px #000,0 0 2px #000,0 0 1px #000}
+.on-sat .leaflet-interactive[stroke-dasharray="4 3"]{}
 #tilemsg{position:absolute;z-index:500;left:50%;transform:translateX(-50%);top:10px;background:var(--warn-soft);color:var(--warn);padding:6px 10px;border-radius:6px;font-size:12px;max-width:80%}
 @media (max-width:760px){
   body{overflow:auto}
@@ -788,9 +779,9 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
           </select></div>
         <div><label class="lbl" for="base">Peta dasar</label>
           <select id="base">
-            <option value="none">Garis pantai</option>
+            <option value="sat" selected>Citra satelit</option>
             <option value="osm">OpenStreetMap</option>
-            <option value="sat">Citra satelit</option>
+            <option value="none">Garis pantai (offline)</option>
           </select></div>
       </div>
       <div><label class="lbl" for="q">Cari lokasi</label>
@@ -855,23 +846,29 @@ function colorOf(g){const i=groups().indexOf(g);return css('--g'+(i+1));}
 
 // map
 const map=L.map('map',{zoomSnap:.25,preferCanvas:false,worldCopyJump:false,attributionControl:true});
-const baseLand=L.geoJSON(BASE,{interactive:false,attribution:'Garis pantai: Natural Earth',style:f=>({color:css('--land-line'),weight:.7,fillColor:f.properties.name==='Indonesia'?css('--land'):css('--neighbour'),fillOpacity:1})}).addTo(map);
+const baseLand=L.geoJSON(BASE,{interactive:false,attribution:'Garis pantai: Natural Earth',style:f=>({color:css('--land-line'),weight:.7,fillColor:f.properties.name==='Indonesia'?css('--land'):css('--neighbour'),fillOpacity:1})});
 const tiles={
   osm:L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}),
-  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'})
+  sat:L.layerGroup([
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}),
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19})
+  ])
 };
 let tileErr=0;
-Object.values(tiles).forEach(t=>t.on('tileerror',()=>{if(++tileErr===3)showTileMsg()}));
-function showTileMsg(){if(document.getElementById('tilemsg'))return;const d=document.createElement('div');d.id='tilemsg';d.textContent='Peta dasar online tidak bisa dimuat di tampilan ini. Buka dari GitHub Pages atau file lokal agar tampil.';document.getElementById('map').appendChild(d);}
-document.getElementById('base').onchange=e=>{
-  Object.values(tiles).forEach(t=>map.removeLayer(t));tileErr=0;document.getElementById('tilemsg')?.remove();
-  const v=e.target.value;
+const onErr=()=>{if(++tileErr===3)fallback()};
+tiles.osm.on('tileerror',onErr);tiles.sat.eachLayer(l=>l.on('tileerror',onErr));
+function fallback(){const sel=document.getElementById('base');if(sel.value==='none')return;sel.value='none';setBase('none');showTileMsg();}
+function showTileMsg(){if(document.getElementById('tilemsg'))return;const d=document.createElement('div');d.id='tilemsg';d.textContent='Citra satelit/OSM tidak bisa dimuat di tampilan ini, jadi peta beralih ke garis pantai. Buka dari GitHub Pages agar citra satelit tampil.';document.getElementById('map').appendChild(d);}
+function setBase(v){
+  Object.values(tiles).forEach(t=>map.removeLayer(t));tileErr=0;
   if(v==='none'){baseLand.addTo(map);baseLand.bringToBack();}
   else{map.removeLayer(baseLand);tiles[v].addTo(map);}
+  document.getElementById('map').classList.toggle('on-sat',v==='sat');
   refresh();
-};
+}
+document.getElementById('base').onchange=e=>{document.getElementById('tilemsg')?.remove();setBase(e.target.value);};
 
-const lahanLayer=L.layerGroup(DATA.lahan.map(l=>L.polyline(l.c,{color:css('--warn'),weight:2,dashArray:'4 3'}).bindTooltip(l.n))).addTo(map);
+const lahanLayer=L.layerGroup(DATA.lahan.map(l=>L.polyline(l.c,{color:'#ffd23f',weight:2.5,dashArray:'4 3'}).bindTooltip(l.n))).addTo(map);
 const extraLayer=L.layerGroup(DATA.extra.map(e=>L.circleMarker([e.lat,e.lon],{radius:5,color:css('--extra'),weight:2,fillColor:css('--extra'),fillOpacity:.35})
   .bindPopup(`<div class="pp"><h3>${e.nama}</h3><div class="loc">Titik ada di KMZ Okt 26, tetapi tidak tercantum di daftar 53 lokasi (Excel Opsi Klusterisasi).</div><div class="co">${e.lat.toFixed(5)}, ${e.lon.toFixed(5)}</div></div>`)));
 
@@ -911,7 +908,7 @@ function visible(s){
 function refresh(){
   markers.forEach(m=>{
     const s=m.site,c=colorOf(groupOf(s)),v=visible(s);
-    m.setStyle({color:s.src==='KMZ'?(document.getElementById('base').value==='none'?css('--panel'):'#fff'):c,fillColor:c,fillOpacity:s.src==='KMZ'?.85:.15,dashArray:s.src==='KMZ'?null:'3 2'});
+    m.setStyle({color:s.src==='KMZ'?'#ffffff':c,fillColor:c,fillOpacity:s.src==='KMZ'?.9:.25,dashArray:s.src==='KMZ'?null:'3 2'});
     if(v&&!siteLayer.hasLayer(m))siteLayer.addLayer(m);
     if(!v&&siteLayer.hasLayer(m))siteLayer.removeLayer(m);
     const tt=m.getTooltip();
@@ -956,9 +953,7 @@ document.getElementById('notesList').innerHTML=[
 ].map(t=>`<li>${t}</li>`).join('');
 
 map.fitBounds(siteLayer.getBounds(),{padding:[24,24]});
-refresh();
-// re-color on theme change
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{baseLand.setStyle(f=>({color:css('--land-line'),fillColor:f.properties.name==='Indonesia'?css('--land'):css('--neighbour')}));refresh();});
+setBase(document.getElementById('base').value);
 </script>
 
 </body>
