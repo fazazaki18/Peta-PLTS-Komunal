@@ -27,6 +27,7 @@ Peta interaktif lokasi PLTS Komunal + BESS Program Lisdes TA 2026. Peta membaca 
 | `jtm_kms`, `jtr_kms` | Panjang JTM/JTR |
 | `kluster` | `A` atau `B` |
 | `paket_2`, `paket_4`, `paket_5`, `paket_6` | Nomor paket menurut Excel *Analisis Pemaketan 53 Lokasi* (opsi 2, 4, 5, dan 6 paket) |
+| `paket_3` | Nomor paket opsi 3 Paket: 1 = P1+P3, 2 = P2+P4, 3 = P5+P6 dari 6 paket (sama dengan Opsi 1 pencocokan cluster). Label dan warna legenda diatur di `PAKET3` dalam `index.html` |
 | `opsi1` … `opsi5` | Nomor paket di opsi klusterisasi awal (Excel *Opsi Klusterisasi*) |
 | `config` | Kode konfigurasi dari rekap koordinat (mis. `config_e_6`) |
 | `catatan` | Kalau diisi, lokasi diberi tanda CEK dan catatannya muncul di popup |
