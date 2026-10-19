@@ -23,6 +23,7 @@ Peta interaktif lokasi PLTS Komunal + BESS Program Lisdes TA 2026. Peta membaca 
 | `lat`, `lon` | Koordinat desimal (wajib). Contoh: `-3.56166` dan `133.33679` |
 | `sumber_koordinat` | `KMZ` = titik penuh; selain itu (mis. `Indikatif`) = titik putus-putus |
 | `pv_kwp`, `bess_kwh`, `capel` | Kapasitas PV, BESS, jumlah calon pelanggan |
+| `pagu_rp` | *(opsional, tidak dimuat di repo publik)* Pagu dalam Rupiah. Jika kolom ini ada, panel ringkasan otomatis menampilkan total pagu per paket/cluster |
 | `jtm_kms`, `jtr_kms` | Panjang JTM/JTR |
 | `kluster` | `A` atau `B` |
 | `paket_2`, `paket_4`, `paket_5`, `paket_6` | Nomor paket menurut Excel *Analisis Pemaketan 53 Lokasi* (opsi 2, 4, 5, dan 6 paket) |
@@ -49,4 +50,4 @@ Baris dengan nama kosong atau koordinat di luar wilayah Indonesia tidak ditampil
 ## Catatan
 - Peta hanya tampil lewat GitHub Pages (atau server web). Jika `index.html` dibuka langsung dari komputer, CSV tidak bisa dibaca browser.
 - Peta dasar: citra satelit Esri (default), OpenStreetMap, atau garis pantai Natural Earth.
-- Nilai RAB/pagu tidak dimuat.
+- Nilai pagu sengaja tidak dimuat di repo ini karena situs GitHub Pages bersifat publik.

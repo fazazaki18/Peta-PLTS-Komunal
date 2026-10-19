@@ -675,7 +675,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --sea:#d9e4ea; --land:#f6f7f4; --land-line:#9fb0ba; --neighbour:#eceeea;
   --bg:#f3f6f7; --panel:#ffffff; --fg:#14222c; --muted:#5b6d78; --line:#d5dee3;
   --accent:#0f6e8c; --accent-soft:#e1eff4; --warn:#a15c00; --warn-soft:#fdf1df;
-  --g1:#0f6e8c; --g2:#c2410c; --g3:#4d7c0f; --g4:#7e3fb0; --g5:#b8860b; --g6:#be185d; --g7:#0d9488; --g8:#475569; --extra:#7a8a94;
+  --g1:#2a78d6; --g2:#eb6834; --g3:#1baf7a; --g4:#eda100; --g5:#e87ba4; --g6:#008300; --g7:#6250d6; --g8:#e34948; --extra:#7a8a94;
   color-scheme:light;
   --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -700,10 +700,20 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
 .checks{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
 .checks label{display:flex;align-items:center;gap:6px;cursor:pointer}
 .legend{display:grid;gap:3px;padding:10px 14px;border-bottom:1px solid var(--line)}
-.lg{display:grid;grid-template-columns:14px 1fr auto auto;gap:8px;align-items:center;font-size:13px;padding:3px 4px;border-radius:5px;cursor:pointer;border:0;background:none;color:inherit;text-align:left;font-family:inherit}
+.lg{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;font-size:13px;padding:3px 4px;border-radius:5px;cursor:pointer;border:0;background:none;color:inherit;text-align:left;font-family:inherit}
 .lg:hover{background:var(--accent-soft)}
 .lg.off{opacity:.38}
 .lg .sw{width:12px;height:12px;border-radius:50%}
+.lg.wp{grid-template-columns:14px 1fr auto;grid-template-rows:auto auto;row-gap:3px;padding:6px 4px}
+.lg.wp .pg{font:600 12.5px var(--f-mono);font-variant-numeric:tabular-nums;text-align:right;grid-column:3;grid-row:1}
+.lg.wp .n{grid-column:2;grid-row:2;font-size:11.5px}
+.lg.wp .bar{grid-column:2;grid-row:3;height:6px;border-radius:3px;background:var(--line);overflow:hidden;align-self:center}
+.lg.wp .bar i{display:block;height:100%;border-radius:3px}
+.lg.wp .pct{grid-column:3;grid-row:3;font:11.5px var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.lg-head{display:grid;grid-template-columns:14px 1fr auto;gap:8px;padding:0 4px 4px;font:500 10px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lg-head span:nth-child(3){display:none}
+.lg-sum{margin-top:6px;padding:8px 4px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:grid;gap:3px}
+.lg-sum b{color:var(--fg);font:600 14px var(--f-mono);font-variant-numeric:tabular-nums}
 .lg .n,.lg .k{font:12px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
 .lg .k{min-width:72px;text-align:right}
 .list{overflow:auto;flex:1;min-height:0}
@@ -752,7 +762,7 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
   body{overflow:auto}
   main{grid-template-columns:1fr;grid-template-rows:58vh auto}
   #map{grid-row:1}
-  aside{grid-row:2;border-right:0}
+  aside{grid-row:2;border-right:0;display:block}
   .list{max-height:none;overflow:visible}
   .stats{margin-left:0}
 }
@@ -844,6 +854,7 @@ function num(v){
 const key=h=>String(h||'').toLowerCase().replace(/^﻿/,'').replace(/[^a-z0-9]/g,'');
 function pick(r,...names){for(const n of names){const v=r[key(n)];if(v!==undefined&&String(v).trim()!=='')return String(v).trim();}return '';}
 async function loadCSV(path){
+  if(window.EMBED&&EMBED[path]!=null)return Papa.parse(EMBED[path],{header:true,skipEmptyLines:'greedy',transformHeader:key}).data;
   const res=await fetch(path+'?v='+Date.now(),{cache:'no-store'});
   if(!res.ok)throw new Error(path+' tidak ditemukan ('+res.status+')');
   const txt=await res.text();
@@ -861,7 +872,7 @@ function toSite(r,i){
   return {no:isFinite(no)?no:i+1,nama,prov:pick(r,'provinsi'),kab:pick(r,'kabupaten'),kec:pick(r,'kecamatan'),desa:pick(r,'desa'),config:pick(r,'config'),unit:pick(r,'unit'),
     wil:pick(r,'wilayah')||'(tanpa wilayah)',lat,lon,src:pick(r,'sumber_koordinat','sumber')||'-',
     kwp:num(pick(r,'pv_kwp','kwp'))||0,kwh:num(pick(r,'bess_kwh','kwh'))||0,capel:num(pick(r,'capel'))||0,
-    jtm:num(pick(r,'jtm_kms'))||0,jtr:num(pick(r,'jtr_kms'))||0,klu:pick(r,'kluster')||'-',
+    jtm:num(pick(r,'jtm_kms'))||0,pagu:num(pick(r,'pagu_rp','pagu'))||0,jtr:num(pick(r,'jtr_kms'))||0,klu:pick(r,'kluster')||'-',
     opsi:[1,2,3,4,5].map(k=>pick(r,'opsi'+k)||'-'),
     pk:Object.fromEntries(PAKET_N.map(n=>[n,pick(r,'paket_'+n)||'-'])),flag:pick(r,'catatan')};
 }
@@ -936,6 +947,7 @@ function popup(s){
    <tr><td>PV</td><td>${fmt(s.kwp,1)} kWp</td></tr>
    <tr><td>BESS</td><td>${fmt(s.kwh,1)} kWh</td></tr>
    <tr><td>Calon pelanggan</td><td>${fmt(s.capel)}</td></tr>
+   ${s.pagu?`<tr><td>Pagu</td><td>${rpM(s.pagu)}</td></tr>`:''}
    <tr><td>JTM / JTR</td><td>${fmt(s.jtm,2)} / ${fmt(s.jtr,2)} kms</td></tr>
    <tr><td>Kluster</td><td>${esc(s.klu)}</td></tr>
    <tr><td>Wilayah</td><td>${esc(s.wil)}</td></tr>
@@ -951,6 +963,10 @@ function visible(s){
   if(!q)return true;
   return [s.nama,s.desa,s.kab,s.prov,s.kec,s.unit].join(' ').toLowerCase().includes(q);
 }
+const rpM=v=>'Rp '+fmt(v/1e9,2)+' M';
+const rpT=v=>'Rp '+fmt(v/1e12,2)+' T';
+const rpFull=v=>'Rp '+fmt(v,0);
+function grpLabel(){const o=document.querySelector('#grp option:checked');return o?esc(o.closest('optgroup')?.label.startsWith('6 Paket →')?'Cluster':o.textContent):'Grup';}
 function refresh(){
   markers.forEach(m=>{
     const s=m.site,c=colorOf(groupOf(s)),v=visible(s),k=isKMZ(s);
@@ -962,15 +978,28 @@ function refresh(){
   document.getElementById('nLok').textContent=S.length;
   const tot=k=>S.reduce((a,s)=>a+(+s[k]||0),0);
   document.getElementById('stats').innerHTML=[
-    [S.length,'lokasi'],[fmt(tot('kwp'),1),'kWp PV'],[fmt(tot('kwh')/1000,1),'MWh BESS'],[fmt(tot('capel')),'calon pelanggan']
+    [S.length,'lokasi'],[fmt(tot('kwp'),1),'kWp PV'],[fmt(tot('kwh')/1000,1),'MWh BESS'],[fmt(tot('capel')),'calon pelanggan'],
+    ...(tot('pagu')>0?[[rpT(tot('pagu')),'total pagu']]:[])
   ].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
   const gs=groups();
-  document.getElementById('legend').innerHTML=gs.map(g=>{
-    const ss=S.filter(s=>groupOf(s)===g);
-    return `<button class="lg ${hidden.has(g)?'off':''}" data-g="${esc(g)}" title="Klik untuk sembunyikan/tampilkan">
-      <span class="sw" style="background:${colorOf(g)}"></span><span>${esc(g)}</span>
-      <span class="n">${ss.length} lok</span><span class="k">${fmt(ss.reduce((a,s)=>a+s.kwp,0),1)} kWp</span></button>`;
-  }).join('')+(S.some(s=>!isKMZ(s))?`<div class="lg" style="cursor:default"><span class="sw" style="border:2px dashed var(--muted);width:8px;height:8px"></span><span style="color:var(--muted)">Koordinat indikatif / bukan KMZ</span><span></span><span></span></div>`:'');
+  const hasPagu=S.some(s=>s.pagu>0);
+  const rowsG=gs.map(g=>{const ss=S.filter(s=>groupOf(s)===g);
+    return {g,n:ss.length,kwp:ss.reduce((a,s)=>a+s.kwp,0),kwh:ss.reduce((a,s)=>a+s.kwh,0),pagu:ss.reduce((a,s)=>a+s.pagu,0)};});
+  const totP=rowsG.reduce((a,r)=>a+r.pagu,0), maxP=Math.max(...rowsG.map(r=>r.pagu),1);
+  let leg=`<div class="lg-head"><span></span><span>${grpLabel()}</span><span>Lokasi · kWp</span>${hasPagu?'<span>Pagu</span>':''}</div>`;
+  leg+=rowsG.map(r=>`<button class="lg ${hidden.has(r.g)?'off':''}${hasPagu?' wp':''}" data-g="${esc(r.g)}" title="${esc(r.g)}: ${r.n} lokasi · ${fmt(r.kwp,1)} kWp · ${fmt(r.kwh,1)} kWh${hasPagu?' · '+rpFull(r.pagu):''}. Klik untuk sembunyikan/tampilkan.">
+      <span class="sw" style="background:${colorOf(r.g)}"></span><span class="gn">${esc(r.g)}</span>
+      <span class="n">${r.n} lok · ${fmt(r.kwp,1)} kWp</span>
+      ${hasPagu?`<span class="pg">${rpM(r.pagu)}</span>
+      <span class="bar"><i style="width:${(r.pagu/maxP*100).toFixed(1)}%;background:${colorOf(r.g)}"></i></span>
+      <span class="pct">${fmt(totP?r.pagu/totP*100:0,1)}%</span>`:''}</button>`).join('');
+  if(hasPagu&&rowsG.length>1){
+    const ps=rowsG.map(r=>r.pagu),mx=Math.max(...ps),mn=Math.min(...ps),avg=totP/ps.length;
+    leg+=`<div class="lg-sum"><div><b>Total ${rpM(totP)}</b> <span>(${rpT(totP)})</span></div>
+      <div>Rata-rata ${rpM(avg)} per ${grp[0]==='c'?'cluster':'grup'} · maks/min ${fmt(mx/mn,2)}× · selisih maks–min ${rpM(mx-mn)} (${fmt((mx-mn)/avg*100,1)}% thd rata-rata)</div></div>`;
+  }
+  leg+=(S.some(s=>!isKMZ(s))?`<div class="lg" style="cursor:default"><span class="sw" style="border:2px dashed var(--muted);width:8px;height:8px"></span><span style="color:var(--muted)">Koordinat indikatif / bukan KMZ</span><span></span></div>`:'');
+  document.getElementById('legend').innerHTML=leg;
   const o=grp[0]==='c'?PAIR.find(x=>x.opsi===grp.slice(1)):null;
   document.getElementById('pairInfo').hidden=!o;
   if(o)document.getElementById('pairInfo').innerHTML=`<b>Opsi ${esc(o.opsi)}</b> · peringkat ${esc(o.rank)} dari ${PAIR.length}${o.ket?' · '+esc(o.ket):''}<br>
@@ -996,7 +1025,7 @@ function notes(){
   if(ind.length)items.push(`${ind.length} lokasi memakai koordinat bukan dari KMZ: ${ind.map(esc).join(', ')}.`);
   if(fl)items.push(`${fl} lokasi punya catatan (ditandai CEK). Klik lokasinya untuk membaca catatan.`);
   if(EXTRA.length)items.push(`${EXTRA.length} titik di KMZ tidak tercantum di daftar: ${EXTRA.map(e=>esc(e.nama)).join(', ')}. Aktifkan "Titik KMZ di luar daftar" untuk melihatnya.`);
-  items.push(`Data dibaca dari ${FILE_LOKASI}. Nilai RAB/pagu tidak dimuat.`);
+  items.push(`Data dibaca dari ${FILE_LOKASI}.${S.some(s=>s.pagu>0)?' Pagu = RAB EPC PLTS incl. asuransi (Excel Analisis Pemaketan 53 Lokasi). M = miliar, T = triliun.':''}`);
   document.getElementById('notesList').innerHTML=items.map(t=>`<li>${t}</li>`).join('');
   if(SKIP.length)document.getElementById('notes').open=true;
 }
@@ -1045,7 +1074,7 @@ async function init(){
     notes();
   }catch(e){}
   try{
-    const res=await fetch(FILE_LAHAN+'?v='+Date.now(),{cache:'no-store'});
+    const res=window.EMBED&&EMBED[FILE_LAHAN]?{ok:true,json:async()=>JSON.parse(EMBED[FILE_LAHAN])}:await fetch(FILE_LAHAN+'?v='+Date.now(),{cache:'no-store'});
     if(res.ok){const gj=await res.json();
       L.geoJSON(gj,{style:{color:'#ffd23f',weight:2.5,dashArray:'4 3',fill:false},onEachFeature:(f,l)=>l.bindTooltip(esc(f.properties?.nama||'Lahan'))}).eachLayer(l=>lahanLayer.addLayer(l));}
   }catch(e){}
