@@ -1,6 +1,6 @@
 # Peta PLTS Komunal Lisdes
 
-Data koordinat mengacu pada KMZ *Lokasi 53 PLTS Komunal* (rekap 30-09-26).
+Koordinat dan batas lahan mengacu pada KMZ *PLTS KOMUNAL LISDES 53 LOKASI-Okt 26 updated 5* (21-10-26), kecuali Pulau Panjang (Kundur) yang memakai koordinat rekap 30-09-26 (0,744; 103,559).
 
 Peta interaktif lokasi PLTS Komunal + BESS Program Lisdes TA 2026. Peta membaca data dari file CSV di folder `data/`, jadi data cukup diubah lewat CSV tanpa menyentuh `index.html`.
 
@@ -9,7 +9,6 @@ Peta interaktif lokasi PLTS Komunal + BESS Program Lisdes TA 2026. Peta membaca 
 |---|---|---|
 | `index.html` | Halaman peta (kode, tampilan, garis pantai) | Tidak |
 | `data/lokasi.csv` | Daftar lokasi, satu baris per lokasi | **Ya, ini file utamanya** |
-| `data/titik-kmz-luar-daftar.csv` | Titik di KMZ yang tidak ada di daftar | Opsional |
 | `data/pencocokan-cluster.csv` | Opsi pasangan 6 Paket → 3 Cluster | Opsional |
 | `data/lahan.geojson` | Batas lahan dari KMZ | Jarang |
 

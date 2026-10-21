@@ -794,7 +794,6 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
       <div class="checks">
         <label><input type="checkbox" id="cLbl"> Nama lokasi</label>
         <label><input type="checkbox" id="cLahan" checked> Batas lahan</label>
-        <label><input type="checkbox" id="cExtra"> Titik KMZ di luar daftar</label>
       </div>
     </div>
     <div class="legend" id="legend"></div>
@@ -811,7 +810,7 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
 // ===== Pengaturan =====
 // File data dibaca dari folder data/. Edit file CSV, bukan file ini.
 const FILE_LOKASI='data/lokasi.csv';
-const FILE_LUAR='data/titik-kmz-luar-daftar.csv';
+const FILE_LUAR='';   // isi 'data/titik-kmz-luar-daftar.csv' bila perlu menampilkan titik di luar daftar
 const FILE_LAHAN='data/lahan.geojson';
 const FILE_PAIR='data/pencocokan-cluster.csv';
 const PAKET_N=[2,4,5,6];   // kolom paket_2, paket_4, paket_5, paket_6 di lokasi.csv
@@ -1067,6 +1066,7 @@ async function init(){
   refresh();notes();
   // data pelengkap (tidak wajib ada)
   try{
+    if(!FILE_LUAR)throw 0;
     const ex=await loadCSV(FILE_LUAR);
     EXTRA=ex.map(r=>({nama:pick(r,'nama'),lat:num(pick(r,'lat')),lon:num(pick(r,'lon')),ket:pick(r,'keterangan')})).filter(e=>e.nama&&isFinite(e.lat)&&isFinite(e.lon));
     EXTRA.forEach(e=>extraLayer.addLayer(L.circleMarker([e.lat,e.lon],{radius:5,color:css('--extra'),weight:2,fillColor:css('--extra'),fillOpacity:.35})
@@ -1084,7 +1084,7 @@ document.getElementById('grp').onchange=e=>{grp=e.target.value;hidden.clear();re
 document.getElementById('q').oninput=e=>{q=e.target.value.trim().toLowerCase();refresh();};
 document.getElementById('cLbl').onchange=e=>{showLbl=e.target.checked;refresh();};
 document.getElementById('cLahan').onchange=e=>e.target.checked?lahanLayer.addTo(map):map.removeLayer(lahanLayer);
-document.getElementById('cExtra').onchange=e=>e.target.checked?extraLayer.addTo(map):map.removeLayer(extraLayer);
+document.getElementById('cExtra')&&(document.getElementById('cExtra').onchange=e=>e.target.checked?extraLayer.addTo(map):map.removeLayer(extraLayer));
 init();
 </script>
 </body>
